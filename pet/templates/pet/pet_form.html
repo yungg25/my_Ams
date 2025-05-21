@@ -1,0 +1,19 @@
+{% extends "pet/pet_base.html" %}
+
+{% block title %}동물 등록{% endblock %}
+
+{% block content %}
+<h2 style="text-align: center;">🐾 동물 등록</h2>
+
+<form method="post" enctype="multipart/form-data" style="max-width: 600px; margin: auto;">
+  {% csrf_token %}
+  {{ form.as_p }}
+
+  <div style="text-align: center; margin-top: 20px;">
+    <button type="submit">등록하기</button>
+    <a href="{% url 'animal_list' %}">
+      <button type="button">← 목록으로</button>
+    </a>
+  </div>
+</form>
+{% endblock %}

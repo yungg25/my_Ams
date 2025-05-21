@@ -1,0 +1,37 @@
+{% extends "pet/pet_base.html" %}
+{% block title %}펫 푸드 목록{% endblock %}
+
+{% block content %}
+<h2 style="text-align:center; font-size: 30px; margin-bottom: 40px; color: #333; font-weight: 800;">
+  🍖 강아지 요리 레시피 모음
+</h2>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 32px; max-width: 1000px; margin: 0 auto;">
+  {% for food in foods %}
+  <div style="background: white; border-radius: 16px; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08); overflow: hidden; transition: transform 0.3s ease;">
+    <a href="{% url 'pet:pet_food_detail' food.pk %}" style="text-decoration: none; color: inherit;">
+      {% if food.image %}
+      <img src="{{ food.image.url }}" alt="{{ food.title }}" style="width: 100%; height: 180px; object-fit: cover;">
+      {% endif %}
+      <div style="padding: 20px;">
+        <h3 style="font-size: 20px; font-weight: bold; margin-bottom: 10px;">
+          {% if "죽" in food.title %}🍲{% elif "쿠키" in food.title %}🍪{% elif "덮밥" in food.title %}🍚{% endif %}
+          {{ food.title }}
+        </h3>
+        <p style="font-size: 14px; color: #666;">{{ food.ingredients|truncatechars:60 }}</p>
+        <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+          <p style="font-size: 13px; color: #aaa;">🕒 {{ food.created_at|date:"Y.m.d" }}</p>
+          <p style="font-size: 14px; color: #e63946;">❤️ {{ food.likes.count }} 좋아요</p>
+        </div>
+      </div>
+    </a>
+  </div>
+  {% empty %}
+  <p style="text-align: center;">등록된 요리가 아직 없습니다.</p>
+  {% endfor %}
+</div>
+
+<div style="text-align: center; margin-top: 50px;">
+  <a href="{% url 'pet:pet_food_create' %}" style="background: #4e89ae; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600;">+ 요리 등록</a>
+</div>
+{% endblock %}

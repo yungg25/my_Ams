@@ -1,0 +1,99 @@
+{% extends "pet/pet_base.html" %}
+{% block title %}펫 푸드 등록{% endblock %}
+
+{% block content %}
+<style>
+  .form-wrapper {
+    max-width: 720px;
+    margin: 0 auto;
+    background: #fff;
+    padding: 48px 36px;
+    border-radius: 20px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  }
+
+  .form-wrapper h2 {
+    text-align: center;
+    margin-bottom: 32px;
+    font-size: 32px;
+    color: #2c3e50;
+    font-weight: bold;
+  }
+
+  .form-wrapper label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 15px;
+    color: #34495e;
+  }
+
+  .form-wrapper input[type="text"],
+  .form-wrapper textarea {
+    width: 100%;
+    padding: 14px;
+    font-size: 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    transition: border 0.3s;
+  }
+
+  .form-wrapper textarea {
+    resize: vertical;
+  }
+
+  .form-wrapper input[type="text"]:focus,
+  .form-wrapper textarea:focus {
+    border-color: #3498db;
+    outline: none;
+  }
+
+  .form-wrapper button {
+    padding: 14px 48px;
+    font-size: 17px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: 600;
+  }
+
+  .form-wrapper button:hover {
+    background-color: #2980b9;
+  }
+</style>
+
+<div class="form-wrapper">
+  <h2>🍲 강아지 요리 등록</h2>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div style="margin-bottom: 24px;">
+      <label for="id_title">요리 제목</label>
+      <input type="text" name="title" id="id_title" value="{{ form.title.value|default_if_none:'' }}">
+    </div>
+
+    <div style="margin-bottom: 24px;">
+      <label for="id_ingredients">재료</label>
+      <textarea name="ingredients" id="id_ingredients" rows="4">{{ form.ingredients.value|default_if_none:'' }}</textarea>
+    </div>
+
+    <div style="margin-bottom: 24px;">
+      <label for="id_instructions">조리 방법</label>
+      <textarea name="instructions" id="id_instructions" rows="4">{{ form.instructions.value|default_if_none:'' }}</textarea>
+    </div>
+
+    <div style="margin-bottom: 32px;">
+      <label for="id_image">이미지</label>
+      {{ form.image }}
+    </div>
+
+    <div style="text-align: center;">
+      <button type="submit">등록하기</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

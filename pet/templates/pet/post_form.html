@@ -1,0 +1,75 @@
+{% extends "pet/pet_base.html" %}
+
+{% block title %}게시글 목록{% endblock %}
+
+{% block content %}
+<style>
+  .category-filter {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .category-filter a {
+    text-decoration: none;
+    padding: 8px 14px;
+    background-color: #f0f0f0;
+    border-radius: 20px;
+    color: #333;
+    font-weight: bold;
+    transition: background-color 0.2s;
+  }
+
+  .category-filter a.active,
+  .category-filter a:hover {
+    background-color: #4e89ae;
+    color: white;
+  }
+
+  .post-card {
+    max-width: 700px;
+    margin: 0 auto 20px auto;
+    padding: 20px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.08);
+  }
+
+  .post-card h3 {
+    margin-bottom: 10px;
+  }
+
+  .post-card .meta {
+    font-size: 14px;
+    color: #777;
+    margin-bottom: 10px;
+  }
+
+  .post-card p {
+    line-height: 1.6;
+  }
+</style>
+
+<div class="category-filter">
+  <a href="{% url 'post_list' %}" class="{% if not request.GET.category %}active{% endif %}">전체</a>
+  {% for key, label in form.fields.category.choices %}
+    <a href="?category={{ key }}" class="{% if request.GET.category == key %}active{% endif %}">{{ label }}</a>
+  {% endfor %}
+</div>
+
+{% if posts %}
+  {% for post in posts %}
+    <div class="post-card">
+      <h3><a href="{% url 'post_detail' post.id %}">{{ post.title }}</a></h3>
+      <div class="meta">
+        🏷 {{ post.get_category_display }} | ✍️ {{ post.user.username }} | 🕒 {{ post.created_at|date:"Y.m.d H:i" }}
+      </div>
+      <p>{{ post.content|truncatewords:30 }}</p>
+    </div>
+  {% endfor %}
+{% else %}
+  <p style="text-align: center; color: #888;">표시할 게시글이 없습니다.</p>
+{% endif %}
+{% endblock %}

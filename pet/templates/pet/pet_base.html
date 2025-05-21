@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}반려 동물 관리 시스템{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f9f9f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(to right, #4e89ae, #4361ee);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-inner {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            flex-wrap: wrap;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 32px;
+        }
+
+        .site-title a {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+        }
+
+        .header-menu {
+            display: flex;
+            gap: 24px;
+        }
+
+        .header-menu a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .header-menu a:hover {
+            color: #ffd166;
+        }
+
+        .auth-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            font-size: 15px;
+        }
+
+        .auth-right a,
+        .auth-right span {
+            color: #ffd166;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-right button {
+            background: none;
+            border: none;
+            color: #ffd166;
+            font-size: 15px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .auth-right button:hover,
+        .auth-right a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            padding: 40px 40px;
+            max-width: 100%;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        footer {
+            background-color: #eee;
+            text-align: center;
+            padding: 20px;
+            font-size: 14px;
+            color: #777;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .header-inner {
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .header-left,
+            .auth-right {
+                justify-content: center;
+                flex-wrap: wrap;
+                width: 100%;
+            }
+
+            .header-menu {
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <div class="header-inner">
+            <!-- 왼쪽: 로고 + 제목 + 메뉴 -->
+            <div class="header-left">
+                <div class="logo">🐾</div>
+                <div class="site-title"><a href="{% url 'pet:pet_home' %}">펫 관리 시스템</a></div>
+                <nav class="header-menu">
+                    <a href="{% url 'pet:animal_list' %}">반려 동물 목록</a>
+                    <a href="{% url 'pet:post_list' %}">펫 카페</a>
+                    <a href="{% url 'pet:animal_create' %}">반려 동물 등록</a>
+                    <a href="{% url 'pet:pet_food_list' %}">펫 푸드</a>
+                    <a href="{% url 'pet:recommendation_list' %}">🥩 생식 추천</a>
+                </nav>
+            </div>
+
+            <!-- 오른쪽: 로그인/로그아웃 -->
+            <div class="auth-right">
+                {% if user.is_authenticated %}
+                    <span>{{ user.username }}님</span> |
+                    <form action="{% url 'logout' %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit">로그아웃</button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}">로그인</a> |
+                    <a href="{% url 'pet:signup' %}">회원가입</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>🐶 &nbsp; &copy; 2025 펫 관리 시스템 &nbsp; 🐱</p>
+    </footer>
+</body>
+</html>
