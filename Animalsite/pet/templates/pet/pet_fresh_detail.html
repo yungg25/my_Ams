@@ -1,0 +1,216 @@
+{% extends 'pet/pet_base.html' %}
+{% block title %}{{ item.title }} - 상세 보기{% endblock %}
+
+{% block content %}
+<style>
+  .detail-container {
+    max-width: 720px;
+    margin: 40px auto;
+    padding: 32px 36px;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+  }
+  .detail-title {
+    font-size: 2.4rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 28px;
+    color: #2c3e50;
+  }
+  .detail-image {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .detail-image img {
+    width: 100%;
+    max-width: 600px;
+    border-radius: 14px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+    object-fit: cover;
+  }
+  .detail-info p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    margin-bottom: 16px;
+  }
+  .detail-info strong {
+    color: #34495e;
+    margin-right: 8px;
+  }
+  .detail-info p.description {
+    white-space: pre-wrap;
+    background: #f9f9f9;
+    padding: 14px 20px;
+    border-radius: 12px;
+    box-shadow: inset 0 0 6px #e1e1e1;
+    color: #555;
+  }
+  .btn-back {
+    display: inline-block;
+    margin: 32px auto 0;
+    padding: 12px 28px;
+    border-radius: 12px;
+    border: 2px solid #4e89ae;
+    color: #4e89ae;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+  .btn-back:hover {
+    background-color: #4e89ae;
+    color: white;
+    box-shadow: 0 5px 12px rgba(78, 137, 174, 0.6);
+  }
+
+  /* 이전/다음 버튼 컨테이너 - 아래쪽 */
+  .nav-buttons {
+    max-width: 720px;
+    margin: 30px auto 40px;
+    display: flex;
+    justify-content: space-between;
+  }
+  .nav-buttons a {
+    background: #4e89ae;
+    color: white;
+    padding: 10px 22px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    box-shadow: 0 4px 14px rgba(78, 137, 174, 0.6);
+    transition: background-color 0.3s ease;
+    max-width: 48%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .nav-buttons a:hover {
+    background-color: #3a6785;
+  }
+  .nav-buttons a.disabled {
+    background-color: #aaa;
+    pointer-events: none;
+    box-shadow: none;
+  }
+
+  /* 수정/삭제 버튼 묶음 - 하단 오른쪽, 작게 */
+  .action-buttons {
+    max-width: 720px;
+    margin: 0 auto 60px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+  .action-buttons a, .action-buttons form button {
+    background: #4e89ae;
+    color: white;
+    padding: 6px 14px;  /* 작게 */
+    border-radius: 10px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(78, 137, 174, 0.6);
+    transition: background-color 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    width: 90px;        /* 작게 */
+    justify-content: center;
+    font-size: 0.9rem;  /* 작게 */
+  }
+  .action-buttons a:hover, .action-buttons form button:hover {
+    background-color: #3a6785;
+  }
+  .action-buttons form {
+    margin: 0;
+  }
+  .action-buttons form button {
+    background: #4e89ae;
+    border: none;
+  }
+  .action-buttons svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  @media (max-width: 480px) {
+    .detail-container {
+      padding: 24px 20px;
+    }
+    .detail-title {
+      font-size: 1.8rem;
+    }
+    .nav-buttons {
+      flex-direction: column;
+      gap: 10px;
+    }
+    .nav-buttons a {
+      max-width: 100%;
+    }
+    .action-buttons {
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+    .action-buttons a, .action-buttons form button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+
+<div class="detail-container">
+
+  <h2 class="detail-title">{{ item.title }}</h2>
+
+  {% if item.image %}
+    <div class="detail-image">
+      <img src="{{ item.image.url }}" alt="{{ item.title }}">
+    </div>
+  {% endif %}
+
+  <div class="detail-info">
+    <p><strong>🍽️ 음식 유형:</strong> {{ item.get_food_type_display }}</p>
+    <p><strong>🐾 대상 동물:</strong> {{ item.suitable_for }}</p>
+    <p><strong>📝 설명:</strong></p>
+    <p class="description">{{ item.description }}</p>
+    <p><strong>📅 등록일:</strong> {{ item.created_at|date:"Y년 m월 d일" }}</p>
+    {% if item.recommended_by %}
+      <p><strong>👤 추천자:</strong> {{ item.recommended_by.username }}</p>
+    {% endif %}
+  </div>
+
+  <div class="action-buttons">
+    <a href="{% url 'pet:recommendation_update' item.pk %}">
+      ✏️ 수정
+    </a>
+
+    <form action="{% url 'pet:recommendation_delete' item.pk %}" method="post" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+      {% csrf_token %}
+      <button type="submit">
+        🗑 삭제
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="nav-buttons">
+  {% if prev_item %}
+    <a href="{% url 'pet:recommendation_detail' prev_item.pk %}">← 이전글: {{ prev_item.title|truncatechars:20 }}</a>
+  {% else %}
+    <a class="disabled">← 이전글 없음</a>
+  {% endif %}
+
+  {% if next_item %}
+    <a href="{% url 'pet:recommendation_detail' next_item.pk %}">다음글: {{ next_item.title|truncatechars:20 }} →</a>
+  {% else %}
+    <a class="disabled">다음글 없음 →</a>
+  {% endif %}
+</div>
+
+{% endblock %}

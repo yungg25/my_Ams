@@ -1,0 +1,198 @@
+{% extends 'pet/pet_base.html' %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<style>
+  .post-box {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.05);
+  }
+
+  .post-title {
+    font-size: 26px;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 10px;
+  }
+
+  .post-meta {
+    text-align: center;
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 30px;
+  }
+
+  .post-content {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #444;
+    margin-bottom: 40px;
+  }
+
+  .btn, .btn-danger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    width: 100px;
+    padding: 0 14px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    border-radius: 6px;
+    text-decoration: none;
+    cursor: pointer;
+    line-height: 1;
+  }
+
+  .btn {
+    background-color: #4e89ae;
+    color: white;
+  }
+
+  .btn-danger {
+    background-color: #dc3545;
+    color: white;
+  }
+
+  .post-controls {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin: 30px 0;
+  }
+
+  .comment-section {
+    margin-top: 40px;
+  }
+
+  .comment-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 20px;
+    margin-bottom: 15px;
+  }
+
+  .comment-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 30px;
+  }
+
+  .comment-item {
+    background: #f0f4f8;
+    border-left: 4px solid #4e89ae;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 12px;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  .comment-item-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  .comment-form {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .comment-form textarea {
+    width: 100%;
+    min-height: 90px;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+    resize: vertical;
+  }
+</style>
+
+<div class="post-box">
+  <div class="post-title">{{ post.title }}</div>
+
+  <div class="post-meta">
+    🏷 {{ post.get_category_display }} | ✍️ {{ post.user.username }} | 🕒 {{ post.created_at|date:"Y년 m월 d일 H:i" }}
+  </div>
+
+  <div class="post-content">
+    {{ post.content|linebreaks }}
+  </div>
+
+  <div class="post-controls">
+    {% if prev_post %}
+      <a href="{% url 'pet:post_detail' prev_post.id %}">← 이전 글: {{ prev_post.title|truncatewords:5 }}</a>
+    {% else %}<span></span>{% endif %}
+
+    {% if next_post %}
+      <a href="{% url 'pet:post_detail' next_post.id %}">다음 글: {{ next_post.title|truncatewords:5 }} →</a>
+    {% endif %}
+  </div>
+
+  <div class="comment-section" id="comments">
+    <h3>💬 댓글 <span style="font-size: 15px; color: #888;">({{ comments|length }})</span></h3>
+
+    {% if comments %}
+      <ul class="comment-list">
+        {% for comment in comments %}
+          <li class="comment-item">
+            <div class="comment-item-header">
+              <span>{{ comment.user.username }}</span>
+              <small style="color: #888;">{{ comment.created_at|date:"Y.m.d H:i" }}</small>
+            </div>
+            <p>{{ comment.content|linebreaksbr }}</p>
+            {% if request.user == comment.user or request.user.is_superuser %}
+              <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+                <form method="post" action="{% url 'pet:delete_comment' post.pk comment.id %}" style="margin: 0;">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-danger">🗑 삭제</button>
+                </form>
+              </div>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p style="color: #777;">아직 댓글이 없습니다.</p>
+    {% endif %}
+
+    <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
+      {% if user.is_authenticated %}
+        <form method="post" class="comment-form">
+          {% csrf_token %}
+          {{ comment_form.non_field_errors }}
+          {{ comment_form.content.errors }}
+          {{ comment_form.content }}
+          <button type="submit" class="btn" style="margin-top: 10px; align-self: flex-start;">댓글 작성</button>
+        </form>
+      {% else %}
+        <p style="color:#888;">댓글을 작성하려면 로그인 해주세요.</p>
+      {% endif %}
+
+      {% if request.user == post.user or request.user.is_superuser %}
+        <div style="display: flex; flex-direction: row; gap: 10px; align-items: flex-end;">
+          <form method="get" action="{% url 'pet:post_create' %}">
+            <input type="hidden" name="edit" value="{{ post.id }}">
+            <button type="submit" class="btn">✏️ 수정</button>
+          </form>
+          <form method="post" action="{% url 'pet:post_delete' post.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" onclick="return confirm('정말 삭제하시겠습니까?')">🗑 삭제</button>
+          </form>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

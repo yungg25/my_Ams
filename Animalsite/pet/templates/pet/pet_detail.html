@@ -1,0 +1,130 @@
+{% extends "pet/pet_base.html" %}
+
+{% block title %}{{ animal.name }} 상세 페이지{% endblock %}
+
+{% block content %}
+<div style="max-width: 700px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 0 10px rgba(0,0,0,0.1); text-align: center;">
+  <h2 style="margin-bottom: 10px;">
+    {{ animal.name }} 🐾
+
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'pet:animal_like' animal.id %}" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" style="background: none; border: none; font-size: 20px; cursor: pointer; vertical-align: middle;">
+          {% if user in animal.likes.all %}
+            ❤️
+          {% else %}
+            🤍
+          {% endif %}
+        </button>
+      </form>
+      <span style="font-size: 14px; color: #777;">좋아요 {{ animal.likes.count }}개</span>
+    {% endif %}
+  </h2>
+
+  {% if animal.image %}
+    <div style="width: 100%; aspect-ratio: 4 / 3; background-color: #f8f8f8; border-radius: 12px; margin-bottom: 20px;">
+      <img src="{{ animal.image.url }}" alt="{{ animal.name }}"
+           style="width: 100%; height: 100%; object-fit: contain; padding: 10px;">
+    </div>
+  {% endif %}
+
+  <ul style="text-align: left; line-height: 1.8; margin: 20px auto; max-width: 500px;">
+    <li><strong>종:</strong> {{ animal.species }}</li>
+    <li><strong>견종:</strong> {{ animal.breed|default:"-" }}</li>
+    <li><strong>나이:</strong> {{ animal.age }}살</li>
+    <li><strong>성별:</strong> {{ animal.gender }}</li>
+    <li><strong>중성화 유무:</strong> {{ animal.neutered|yesno:"✅ 예,❌ 아니오" }}</li>
+    <li><strong>예방접종:</strong> {{ animal.vaccinated|yesno:"✅ 완료,❌ 미완료" }}</li>
+    <li><strong>등록일:</strong> {{ animal.created_at|date:"Y년 m월 d일 H:i" }}</li>
+  </ul>
+
+  {% if animal.personality %}
+    <p><strong>성격:</strong><br>{{ animal.personality|linebreaks }}</p>
+  {% endif %}
+
+  {% if animal.description %}
+    <p style="margin-top: 20px;"><strong>소개:</strong><br>{{ animal.description|linebreaks }}</p>
+  {% endif %}
+
+  <!-- 이전/다음 버튼 -->
+  <div style="margin: 30px 0; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+    {% if prev_animal %}
+      <a href="{% url 'pet:animal_detail' prev_animal.id %}">
+        <button style="padding: 8px 16px; border: none; border-radius: 6px; background-color: #adb5bd; color: white; cursor: pointer;">
+          ← 이전: {{ prev_animal.name }}
+        </button>
+      </a>
+    {% else %}
+      <div></div>
+    {% endif %}
+
+    {% if next_animal %}
+      <a href="{% url 'pet:animal_detail' next_animal.id %}">
+        <button style="padding: 8px 16px; border: none; border-radius: 6px; background-color: #6c757d; color: white; cursor: pointer;">
+          다음: {{ next_animal.name }} →
+        </button>
+      </a>
+    {% endif %}
+  </div>
+
+  <!-- 댓글 -->
+  <div style="margin-top: 40px; text-align: left;">
+    <h3>💬 댓글</h3>
+    {% if comments %}
+      <ul>
+        {% for comment in comments %}
+          <li style="margin-bottom: 10px; background: #f1f1f1; padding: 10px; border-radius: 6px;">
+            <strong>{{ comment.user.username }}</strong>
+            <small>{{ comment.created_at|date:"Y.m.d H:i" }}</small><br>
+            {{ comment.content|linebreaksbr }}
+            {% if request.user == comment.user or request.user.is_superuser %}
+              <form method="post" action="{% url 'pet:delete_animal_comment' animal.id comment.id %}" style="display:inline; float:right;">
+                {% csrf_token %}
+                <button type="submit" style="background: none; border: none; color: red;">🗑</button>
+              </form>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p style="color: #888;">아직 댓글이 없습니다.</p>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'pet:animal_comment' animal.id %}" style="margin-top: 20px;">
+        {% csrf_token %}
+        {{ comment_form.content }}
+        <br>
+        <button type="submit" style="margin-top: 10px; padding: 6px 12px; background: #4e89ae; color: white; border: none; border-radius: 4px;">
+          댓글 작성
+        </button>
+      </form>
+    {% endif %}
+  </div>
+
+  <!-- 하단 제어 버튼 -->
+  <div style="margin-top: 30px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+    <a href="{% url 'pet:animal_list' %}">
+      <button style="padding: 8px 16px; border: none; border-radius: 6px; background-color: #ccc; color: #333; cursor: pointer;">
+        ← 뒤로가기
+      </button>
+    </a>
+
+    {% if request.user.is_authenticated %}
+      <a href="{% url 'pet:animal_update' animal.id %}"><button style="padding: 8px 16px; border: none; border-radius: 6px; background-color: #4e89ae; color: white; cursor: pointer;">
+        ✏️ 수정
+      </button></a>
+
+      <form action="{% url 'pet:animal_delete' animal.id %}" method="post" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit"
+                onclick="return confirm('정말 삭제하시겠습니까?')"
+                style="padding: 8px 16px; border: none; border-radius: 6px; background-color: #e63946; color: white; cursor: pointer;">
+          🔚 삭제
+        </button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

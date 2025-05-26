@@ -1,0 +1,77 @@
+{% extends 'pet/pet_base.html' %}
+
+{% block title %}{{ title|default:"동물 등록" }}{% endblock %}
+
+{% block content %}
+<style>
+  .form-container {
+    max-width: 600px;
+    margin: 30px auto;
+    background: white;
+    padding: 30px 40px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.08);
+  }
+
+  .form-container h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #4e89ae;
+  }
+
+  .form-container label {
+    font-weight: bold;
+    margin-top: 12px;
+    display: block;
+  }
+
+  .form-container input[type="text"],
+  .form-container input[type="number"],
+  .form-container input[type="file"],
+  .form-container select,
+  .form-container textarea {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    margin-top: 5px;
+  }
+
+  .form-container input[type="checkbox"] {
+    margin-right: 5px;
+  }
+
+  .form-container button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 20px;
+    background-color: #4e89ae;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  .form-container button:hover {
+    background-color: #3c6e92;
+  }
+</style>
+
+<div class="form-container">
+  <h2>{{ title|default:"반려 동물 등록" }}</h2>
+
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+
+    {% for field in form.visible_fields %}
+      <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+      {{ field }}
+      {{ field.errors }}
+    {% endfor %}
+
+    <button type="submit">등록</button>
+  </form>
+</div>
+{% endblock %}

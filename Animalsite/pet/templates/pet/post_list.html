@@ -1,0 +1,234 @@
+{% extends "pet/pet_base.html" %}
+
+{% block title %}게시글 목록{% endblock %}
+
+{% block content %}
+<style>
+  .category-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 30px;
+    padding: 10px 0;
+  }
+
+  .category-tabs a {
+    padding: 10px 20px;
+    border-radius: 999px;
+    background-color: #f8f9fa;
+    color: #333;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  }
+
+  .category-tabs a:hover {
+    background-color: #4e89ae;
+    color: #fff;
+    transform: scale(1.05);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  }
+
+  .category-tabs a.active {
+    background-color: #4e89ae;
+    color: white;
+    border-color: #4e89ae;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+  }
+
+  .post-card {
+    max-width: 800px;
+    margin: 0 auto 20px auto;
+    padding: 24px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  }
+
+  .post-card h3 {
+    margin-bottom: 10px;
+    font-size: 20px;
+  }
+
+  .post-card h3 a {
+    color: #333;
+    text-decoration: none;
+  }
+
+  .post-card h3 a:hover {
+    text-decoration: underline;
+    color: #4e89ae;
+  }
+
+  .post-card .meta {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 8px;
+  }
+
+  .post-card .meta span {
+    margin-right: 10px;
+  }
+
+  .post-card p {
+    line-height: 1.7;
+    color: #444;
+    margin-bottom: 16px;
+  }
+
+  .btn-group {
+    margin-top: 10px;
+  }
+
+  .btn-group a, .btn-group form button {
+    margin-right: 12px;
+    padding: 6px 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: background-color 0.25s ease;
+    background-color: transparent;
+  }
+
+  .btn-like {
+    color: #f06565;
+    border-color: #f06565;
+  }
+
+  .btn-like:hover {
+    background-color: #f06565;
+    color: white;
+  }
+
+  .btn-edit {
+    color: #4e89ae;
+    border-color: #4e89ae;
+  }
+
+  .btn-edit:hover {
+    background-color: #4e89ae;
+    color: white;
+  }
+
+  .btn-delete {
+    color: #e63946;
+    border-color: #e63946;
+  }
+
+  .btn-delete:hover {
+    background-color: #e63946;
+    color: white;
+  }
+
+  .btn-comment {
+    color: #555;
+    border-color: #555;
+  }
+
+  .btn-comment:hover {
+    background-color: #555;
+    color: white;
+  }
+
+  .post-footer {
+    font-size: 14px;
+    color: #666;
+    margin-top: 14px;
+  }
+
+  .btn-create-post {
+    display: block;
+    max-width: 800px;
+    margin: 0 auto 40px auto;
+    padding: 12px 20px;
+    background-color: #4e89ae;
+    color: white;
+    font-weight: 700;
+    border-radius: 10px;
+    text-align: center;
+    text-decoration: none;
+  }
+
+  .btn-create-post:hover {
+    background-color: #3a6785;
+  }
+
+  /* no posts message */
+  .no-posts {
+    text-align: center;
+    color: #aaa;
+    font-size: 16px;
+    padding: 40px 0;
+  }
+</style>
+
+<!-- 카테고리 버튼 -->
+<div class="category-tabs">
+  <a href="{% url 'pet:post_list' %}" class="{% if not request.GET.category %}active{% endif %}">전체</a>
+  {% for key, label in form.fields.category.choices %}
+    {% if key %}
+      <a href="?category={{ key }}" class="{% if request.GET.category == key %}active{% endif %}">{{ label }}</a>
+    {% endif %}
+  {% endfor %}
+</div>
+
+<!-- 게시글 작성 버튼 -->
+{% if user.is_authenticated %}
+  <a href="{% url 'pet:post_create' %}" class="btn-create-post">+ 새 게시글 작성</a>
+{% endif %}
+
+<!-- 게시글 리스트 -->
+{% if posts %}
+  {% for post in posts %}
+    <div class="post-card">
+      <h3><a href="{% url 'pet:post_detail' post.id %}">{{ post.title }}</a></h3>
+
+      <div class="meta">
+        <span>🏷 {{ post.get_category_display }}</span>
+        <span>✍️ {{ post.user.username }}</span>
+        <span>🕒 {{ post.created_at|date:"Y.m.d H:i" }}</span>
+        <span>💬 {{ post.comments.count }}</span>
+      </div>
+
+      <p>{{ post.content|truncatewords:30 }}</p>
+
+      <div class="btn-group">
+        {% if user.is_authenticated %}
+          <!-- 좋아요 토글 버튼 (링크형, 실제 뷰 필요) -->
+          <a href="{% url 'pet:post_like' post.id %}" class="btn-like">❤️ 좋아요</a>
+
+          <!-- 작성자만 수정/삭제 -->
+          {% if user == post.user %}
+            <a href="{% url 'pet:post_update' post.id %}" class="btn-edit">수정</a>
+            <form method="post" action="{% url 'pet:post_delete' post.id %}" style="display:inline;">
+              {% csrf_token %}
+              <button type="submit" class="btn-delete" onclick="return confirm('정말 삭제하시겠습니까?');">삭제</button>
+            </form>
+          {% endif %}
+        {% endif %}
+      </div>
+
+      <!-- 이전/다음 게시글 링크 (단순 예시) -->
+      <div class="post-footer">
+        {% with prev_post=post.get_previous_by_created_at next_post=post.get_next_by_created_at %}
+          {% if prev_post %}
+            ← <a href="{% url 'pet:post_detail' prev_post.id %}">{{ prev_post.title|truncatechars:15 }}</a>
+          {% endif %}
+          {% if next_post %}
+            {% if prev_post %} | {% endif %}
+            <a href="{% url 'pet:post_detail' next_post.id %}">{{ next_post.title|truncatechars:15 }}</a> →
+          {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+  {% endfor %}
+{% else %}
+  <p class="no-posts">표시할 게시글이 없습니다.</p>
+{% endif %}
+{% endblock %}
